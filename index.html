@@ -1,0 +1,769 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CelebrationTimer Pro - Universal Event Countdown & Shareable Clock</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #070913;
+            color: #f1f5f9;
+        }
+        .ad-slot-box {
+            background: repeating-linear-gradient(
+                -45deg,
+                rgba(30, 41, 59, 0.45),
+                rgba(30, 41, 59, 0.45) 10px,
+                rgba(15, 23, 42, 0.75) 10px,
+                rgba(15, 23, 42, 0.75) 20px
+            );
+            border: 1px dashed rgba(100, 116, 139, 0.35);
+        }
+        .theme-wedding {
+            background: radial-gradient(circle at center, #2e1065 0%, #0f051d 60%, #070913 100%);
+            border-color: rgba(234, 179, 8, 0.4);
+        }
+        .theme-birthday {
+            background: radial-gradient(circle at center, #831843 0%, #3b0764 60%, #070913 100%);
+            border-color: rgba(244, 114, 182, 0.4);
+        }
+        .theme-festival {
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0c0a2a 60%, #070913 100%);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        .theme-exam {
+            background: radial-gradient(circle at center, #0c4a6e 0%, #042f2e 60%, #070913 100%);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+        .timer-box {
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Master Header -->
+    <header class="w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3 flex flex-wrap justify-between items-center gap-3 shadow-2xl">
+        <div class="flex items-center gap-3">
+            <div id="btnLogoHome" class="flex items-center gap-2.5 cursor-pointer">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-indigo-600 flex items-center justify-center text-xl font-black text-white shadow-lg">
+                    ⏳
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base font-black text-white tracking-tight">CelebrationTimer Pro</h1>
+                        <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Poetic Quotes & Live Links</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Weddings • Birthdays • Festivals • Poetic Shayri & Quotes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div class="flex items-center gap-2">
+            <button id="btnSoundToggle" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs p-2.5 rounded-xl border border-slate-700 transition" title="Toggle Sound">
+                🔊
+            </button>
+            <button id="btnShareWhatsApp" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
+                <span>WhatsApp</span> <span>💬</span>
+            </button>
+            <button id="btnOpenCardModal" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-1.5">
+                <span>Story & QR</span> <span>📸</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Ad Placement Placeholder -->
+    <div class="w-full max-w-6xl mx-auto px-4 mt-3">
+        <div class="ad-slot-box rounded-2xl p-2.5 text-center flex flex-col items-center justify-center min-h-[64px]">
+            <span class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Wedding, Gifts & Travel AdSense Slot (Leaderboard 728x90)</span>
+            <span class="text-xs text-slate-400 font-medium">Hotel Bookings, Luxury Gifts & Event Supplies Stream Here</span>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="w-full max-w-6xl mx-auto px-4 py-4 flex-1 flex flex-col gap-6">
+
+        <!-- 1-Click Event Presets & Mode Selector -->
+        <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 gap-1.5 overflow-x-auto max-w-full custom-scrollbar">
+            <button class="preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-md transition whitespace-nowrap flex items-center justify-center gap-1.5" data-preset="wedding">
+                <span>💍</span> <span>Royal Wedding</span>
+            </button>
+            <button class="preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition whitespace-nowrap flex items-center justify-center gap-1.5" data-preset="birthday">
+                <span>🎂</span> <span>Birthday Party</span>
+            </button>
+            <button class="preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition whitespace-nowrap flex items-center justify-center gap-1.5" data-preset="festival">
+                <span>🎆</span> <span>Festival & New Year</span>
+            </button>
+            <button class="preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition whitespace-nowrap flex items-center justify-center gap-1.5" data-preset="exam">
+                <span>📚</span> <span>Exam / Target Goal</span>
+            </button>
+        </div>
+
+        <!-- Master View: Live Theater Countdown Screen -->
+        <section id="countdownTheater" class="theme-wedding border-2 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center text-center justify-between min-h-[460px] relative overflow-hidden transition-all duration-500">
+            
+            <!-- Canvas Floating Particles (Rose Petals, Confetti, Stars) -->
+            <canvas id="particleCanvas" width="800" height="400" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+            <!-- Top Event Header & Themed Quote -->
+            <div class="z-10 flex flex-col items-center gap-2 max-w-2xl">
+                <span id="labelCountdownType" class="text-xs uppercase tracking-widest font-black text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full shadow">
+                    Royal Wedding Countdown
+                </span>
+                
+                <h2 id="displayEventTitle" class="text-2xl sm:text-4xl font-black text-white tracking-tight drop-shadow-lg">
+                    Rahul & Priya's Wedding
+                </h2>
+
+                <!-- Poetic Quote / Shayri Display Box -->
+                <blockquote id="displayEventQuote" class="text-xs sm:text-sm text-amber-200/90 italic font-serif max-w-lg mt-0.5 px-4 py-1.5 border-l-2 border-amber-400/60 bg-black/25 backdrop-blur-sm rounded-r-xl shadow-inner">
+                    "Two souls, one heartbeat, an eternity together. Forever begins when the clock strikes zero."
+                </blockquote>
+
+                <p id="displayTargetDateString" class="text-xs text-slate-300 font-medium mt-1">
+                    December 15, 2026 • 06:30 PM IST
+                </p>
+            </div>
+
+            <!-- 4-Box Digital Flip Countdown Clocks -->
+            <div class="z-10 grid grid-cols-4 gap-2 sm:gap-4 my-6 w-full max-w-xl">
+                <!-- Days -->
+                <div class="bg-slate-950/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-5 flex flex-col items-center timer-box">
+                    <span id="unitDays" class="text-3xl sm:text-5xl font-black text-amber-300 tracking-tight font-mono">00</span>
+                    <span class="text-[9px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-bold mt-1">Days</span>
+                </div>
+                <!-- Hours -->
+                <div class="bg-slate-950/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-5 flex flex-col items-center timer-box">
+                    <span id="unitHours" class="text-3xl sm:text-5xl font-black text-white tracking-tight font-mono">00</span>
+                    <span class="text-[9px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-bold mt-1">Hours</span>
+                </div>
+                <!-- Minutes -->
+                <div class="bg-slate-950/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-5 flex flex-col items-center timer-box">
+                    <span id="unitMinutes" class="text-3xl sm:text-5xl font-black text-white tracking-tight font-mono">00</span>
+                    <span class="text-[9px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-bold mt-1">Minutes</span>
+                </div>
+                <!-- Seconds -->
+                <div class="bg-slate-950/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-5 flex flex-col items-center timer-box">
+                    <span id="unitSeconds" class="text-3xl sm:text-5xl font-black text-rose-400 tracking-tight font-mono">00</span>
+                    <span class="text-[9px] sm:text-[11px] uppercase tracking-widest text-slate-400 font-bold mt-1">Seconds</span>
+                </div>
+            </div>
+
+            <!-- Bottom Live Secondary Stats & Actions -->
+            <div class="z-10 flex flex-wrap justify-center items-center gap-3 text-xs">
+                <span id="totalHoursReadout" class="bg-slate-950/80 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl font-mono text-[11px]">
+                    ⏳ Total Remaining: 340 Hours (20,400 Minutes)
+                </span>
+                <button id="btnCopyDirectLink" class="bg-slate-950/80 hover:bg-slate-900 border border-amber-500/40 text-amber-300 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1 active:scale-95">
+                    <span>Copy Live Link</span> <span>🔗</span>
+                </button>
+                <button id="btnTriggerCelebration" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1 active:scale-95" title="Test Zero Hour Celebration">
+                    <span>Test Zero Hour</span> <span>🎉</span>
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Event Customization & Creator Controls Drawer -->
+        <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>⚙️ Customize Event, Dates & English Quote / Shayri</span>
+                </h3>
+                <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Auto-Encoded in Link</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="flex flex-col gap-1">
+                    <label class="font-bold text-slate-300">Event Title:</label>
+                    <input id="inputTitle" type="text" value="Rahul & Priya's Wedding" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="font-bold text-slate-300">Target Date:</label>
+                    <input id="inputDate" type="date" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="font-bold text-slate-300">Target Time:</label>
+                    <input id="inputTime" type="time" value="18:30" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <!-- Customizable Event Quote / Shayri Field with 1-Click Shuffle -->
+            <div class="flex flex-col gap-1 text-xs">
+                <div class="flex justify-between items-center">
+                    <label class="font-bold text-slate-300">Event Quote / Poetic Shayri (English):</label>
+                    <button type="button" id="btnShuffleQuote" class="text-[11px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 transition active:scale-95">
+                        <span>🎲 Shuffle Next Quote</span>
+                    </button>
+                </div>
+                <input id="inputQuote" type="text" value="Two souls, one heartbeat, an eternity together. Forever begins when the clock strikes zero." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-amber-200 italic font-serif focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-[11px] text-slate-400">Share this link with guests—no signup or app required!</span>
+                <button id="btnUpdateTimer" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow-lg transition active:scale-95 flex items-center gap-1.5">
+                    <span>Update & Save Link</span> <span>✨</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Sponsored Gift Registry / Event Partner Slot -->
+        <div class="bg-gradient-to-r from-slate-900 via-purple-950/40 to-slate-900 border border-purple-500/30 rounded-2xl p-4 flex flex-wrap justify-between items-center gap-3 shadow-xl">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">🎁</span>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-white">Looking for Gifts for This Special Occasion?</h4>
+                    <p class="text-[11px] text-slate-400">Explore curated wedding registries, personalized jewelry, and celebration gift boxes.</p>
+                </div>
+            </div>
+            <button id="btnGiftPartner" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-lg transition active:scale-95">
+                Explore Gifts 🛍️
+            </button>
+        </div>
+
+        <!-- Bottom Ad Slot -->
+        <div class="w-full mt-1">
+            <div class="ad-slot-box rounded-2xl p-3 text-center flex flex-col items-center justify-center min-h-[50px]">
+                <span class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Sponsored Event Advertisers (728x90)</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- STORY CARD & INVITATION QR CODE MODAL -->
+    <div id="cardModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-5 flex flex-col items-center text-center gap-4 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button id="btnCloseCardModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg p-1">&times;</button>
+            
+            <div>
+                <h3 class="font-black text-sm text-white flex items-center justify-center gap-1.5">
+                    <span>📸</span> <span>Story Card & Wedding Invite QR</span>
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Print QR on invitation cards or post Story image on Instagram.</p>
+            </div>
+
+            <!-- The Rendered 9:16 Story Canvas -->
+            <canvas id="storyCanvas" width="340" height="540" class="rounded-2xl border border-white/20 shadow-2xl bg-slate-950"></canvas>
+
+            <!-- Hidden container for QR code generation to draw onto canvas -->
+            <div id="hiddenQrContainer" class="hidden"></div>
+
+            <div class="w-full grid grid-cols-2 gap-2">
+                <button id="btnDownloadStoryImg" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition active:scale-95 flex items-center justify-center gap-1.5">
+                    <span>Save Image</span> <span>⬇️</span>
+                </button>
+                <button id="btnShareStoryDirect" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
+                    <span>Copy Link</span> <span>🔗</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toastBox" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-full text-xs shadow-2xl z-50 transition-all flex items-center gap-1.5">
+        <span>✨</span> <span id="toastMsg">Action completed!</span>
+    </div>
+
+    <script>
+        function notify(msg) {
+            const t = document.getElementById('toastBox');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 2300);
+        }
+
+        function copyClipboard(txt) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(txt);
+            } else {
+                const el = document.createElement('textarea');
+                el.value = txt;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+            }
+            notify('Copied to clipboard! 🔗');
+        }
+
+        // --- Web Audio Synthesizer for Zero Hour Celebration & Chimes ---
+        let soundEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let actx = null;
+
+        function getAudio() {
+            if (!actx) actx = new AudioCtx();
+            if (actx.state === 'suspended') actx.resume();
+            return actx;
+        }
+
+        function playCelebrationFanfare() {
+            if (!soundEnabled) return;
+            try {
+                const a = getAudio();
+                const notes = [440, 554.37, 659.25, 880, 1108.73];
+                notes.forEach((freq, idx) => {
+                    const osc = a.createOscillator();
+                    const gain = a.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, a.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.12, a.currentTime + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, a.currentTime + idx * 0.12 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(a.destination);
+                    osc.start(a.currentTime + idx * 0.12);
+                    osc.stop(a.currentTime + idx * 0.12 + 0.4);
+                });
+            } catch(e) {}
+        }
+
+        document.getElementById('btnSoundToggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btnSoundToggle').innerText = soundEnabled ? '🔊' : '🔇';
+            notify(soundEnabled ? 'Sound enabled 🔊' : 'Sound muted 🔇');
+        });
+
+        // --- State Management ---
+        let currentTheme = 'wedding';
+        let eventTitle = "Rahul & Priya's Wedding";
+        let eventQuote = "Two souls, one heartbeat, an eternity together. Forever begins when the clock strikes zero.";
+        let targetDateTime = null;
+
+        // Set default date to 14 days in future
+        const defaultFuture = new Date();
+        defaultFuture.setDate(defaultFuture.getDate() + 14);
+        defaultFuture.setHours(18, 30, 0, 0);
+
+        const inputTitle = document.getElementById('inputTitle');
+        const inputDate = document.getElementById('inputDate');
+        const inputTime = document.getElementById('inputTime');
+        const inputQuote = document.getElementById('inputQuote');
+
+        inputDate.value = defaultFuture.toISOString().split('T')[0];
+        targetDateTime = defaultFuture;
+
+        // Mode Preset Configs with Curated English Quotes / Shayri
+        const themeConfigs = {
+            wedding: {
+                label: 'Royal Wedding Countdown',
+                title: "Rahul & Priya's Wedding",
+                class: 'theme-wedding',
+                color: '#f59e0b',
+                particleType: 'petals',
+                quotes: [
+                    "Two souls, one heartbeat, an eternity together. Forever begins when the clock strikes zero.",
+                    "From this day forward, you shall not walk alone. My heart will be your shelter, and my arms your home.",
+                    "A true love story never ends, but tonight, our greatest chapter begins.",
+                    "In all the world, there is no heart for me like yours. Counting down to our forever."
+                ]
+            },
+            birthday: {
+                label: 'Birthday Party Celebration',
+                title: "Aura's Sweet 18 Birthday!",
+                class: 'theme-birthday',
+                color: '#f472b6',
+                particleType: 'balloons',
+                quotes: [
+                    "Count your age by friends, not years. Count your life by smiles, not tears.",
+                    "Another year bolder, brighter, and more fabulous. The countdown to magic is on!",
+                    "Cheers to another trip around the sun and making unforgettable memories!",
+                    "Growing older is mandatory, but growing up is completely optional!"
+                ]
+            },
+            festival: {
+                label: 'New Year & Festival Countdown',
+                title: 'New Year Grand Celebration 2027',
+                class: 'theme-festival',
+                color: '#6366f1',
+                particleType: 'fireworks',
+                quotes: [
+                    "Celebrate endings—for they precede new beginnings. Here comes a year full of wonders!",
+                    "Sparkle like fireworks, shine like gold, and welcome the blessings untold.",
+                    "Tomorrow is the first blank page of a 365-page book. Write a great one!"
+                ]
+            },
+            exam: {
+                label: 'Target Goal & Exam Countdown',
+                title: 'UPSC / Civil Services Finals',
+                class: 'theme-exam',
+                color: '#38bdf8',
+                particleType: 'stars',
+                quotes: [
+                    "Discipline is the bridge between goals and accomplishment. Clock is ticking, conquer it!",
+                    "It always seems impossible until it's done. Make every single second count.",
+                    "Hard work beats talent when talent doesn't work hard. Your victory awaits!"
+                ]
+            }
+        };
+
+        // --- Quote Shuffle Engine ---
+        let currentQuoteIndex = 0;
+        document.getElementById('btnShuffleQuote').addEventListener('click', () => {
+            const list = themeConfigs[currentTheme].quotes;
+            currentQuoteIndex = (currentQuoteIndex + 1) % list.length;
+            eventQuote = list[currentQuoteIndex];
+            inputQuote.value = eventQuote;
+            document.getElementById('displayEventQuote').innerText = `"${eventQuote}"`;
+            updateUrlHash();
+            notify('Shuffled to next poetic quote! 🎲');
+        });
+
+        // --- Live Particle Animation Engine on Canvas ---
+        const particleCanvas = document.getElementById('particleCanvas');
+        const pctx = particleCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            particleCanvas.width = particleCanvas.offsetWidth;
+            particleCanvas.height = particleCanvas.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function spawnParticle() {
+            const pType = themeConfigs[currentTheme].particleType;
+            const w = particleCanvas.width;
+            const h = particleCanvas.height;
+
+            if (pType === 'petals') {
+                particles.push({
+                    x: Math.random() * w,
+                    y: -10,
+                    size: Math.random() * 6 + 4,
+                    vx: Math.random() * 1.5 - 0.75,
+                    vy: Math.random() * 1.5 + 1,
+                    color: ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3'][Math.floor(Math.random() * 4)]
+                });
+            } else if (pType === 'balloons') {
+                particles.push({
+                    x: Math.random() * w,
+                    y: h + 10,
+                    size: Math.random() * 8 + 6,
+                    vx: Math.random() * 1 - 0.5,
+                    vy: -(Math.random() * 1.5 + 1.2),
+                    color: ['#ec4899', '#f59e0b', '#3b82f6', '#10b981', '#a855f7'][Math.floor(Math.random() * 5)]
+                });
+            } else {
+                particles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    size: Math.random() * 2 + 1,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    color: '#38bdf8'
+                });
+            }
+        }
+
+        function loopParticles() {
+            pctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            if (Math.random() < 0.25 && particles.length < 45) spawnParticle();
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                pctx.fillStyle = p.color;
+                pctx.beginPath();
+                pctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                pctx.fill();
+
+                if (p.y > particleCanvas.height + 20 || p.y < -20) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(loopParticles);
+        }
+        loopParticles();
+
+        // --- Master Countdown Calculation Loop ---
+        function updateCountdownClock() {
+            if (!targetDateTime) return;
+            const now = new Date();
+            const diff = targetDateTime.getTime() - now.getTime();
+
+            const isPast = (diff <= 0);
+            const absDiff = Math.abs(diff);
+
+            const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((absDiff % (1000 * 60)) / 1000);
+
+            document.getElementById('unitDays').innerText = String(days).padStart(2, '0');
+            document.getElementById('unitHours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('unitMinutes').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('unitSeconds').innerText = String(seconds).padStart(2, '0');
+
+            const totalHours = Math.floor(absDiff / (1000 * 60 * 60));
+            const totalMins = Math.floor(absDiff / (1000 * 60));
+
+            if (isPast) {
+                document.getElementById('labelCountdownType').innerText = `✨ Count-Up Mode • Event Milestone`;
+                document.getElementById('totalHoursReadout').innerText = `🎉 Ongoing for ${days} Days, ${hours} Hours (${totalHours.toLocaleString()} Total Hours)`;
+            } else {
+                document.getElementById('totalHoursReadout').innerText = `⏳ Total Remaining: ${totalHours.toLocaleString()} Hours (${totalMins.toLocaleString()} Minutes)`;
+            }
+        }
+        setInterval(updateCountdownClock, 1000);
+        updateCountdownClock();
+
+        // --- Preset Pill Switcher ---
+        document.querySelectorAll('.preset-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-pill').forEach(b => {
+                    b.className = 'preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition whitespace-nowrap flex items-center justify-center gap-1.5';
+                });
+                btn.className = 'preset-pill flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 shadow-md transition whitespace-nowrap flex items-center justify-center gap-1.5';
+
+                const pKey = btn.dataset.preset;
+                currentTheme = pKey;
+                const conf = themeConfigs[pKey];
+
+                const theater = document.getElementById('countdownTheater');
+                theater.className = `${conf.class} border-2 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center text-center justify-between min-h-[460px] relative overflow-hidden transition-all duration-500`;
+
+                eventTitle = conf.title;
+                inputTitle.value = eventTitle;
+                document.getElementById('displayEventTitle').innerText = eventTitle;
+                document.getElementById('labelCountdownType').innerText = conf.label;
+
+                // Load initial quote for this theme
+                currentQuoteIndex = 0;
+                eventQuote = conf.quotes[0];
+                inputQuote.value = eventQuote;
+                document.getElementById('displayEventQuote').innerText = `"${eventQuote}"`;
+
+                particles = [];
+                updateUrlHash();
+                notify(`Switched to ${conf.label}! ✨`);
+            });
+        });
+
+        // Update Event Details Button
+        document.getElementById('btnUpdateTimer').addEventListener('click', () => {
+            eventTitle = inputTitle.value.trim() || 'Special Event';
+            eventQuote = inputQuote.value.trim() || 'Every second counts towards greatness.';
+            const dateVal = inputDate.value;
+            const timeVal = inputTime.value || '18:00';
+
+            if (dateVal) {
+                targetDateTime = new Date(`${dateVal}T${timeVal}`);
+                document.getElementById('displayEventTitle').innerText = eventTitle;
+                document.getElementById('displayEventQuote').innerText = `"${eventQuote}"`;
+                document.getElementById('displayTargetDateString').innerText = targetDateTime.toLocaleDateString('en-US', {
+                    month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                updateCountdownClock();
+                updateUrlHash();
+                notify('Timer & quote updated into shareable link! 🔗');
+            }
+        });
+
+        // --- Trigger Celebration & Confetti ---
+        document.getElementById('btnTriggerCelebration').addEventListener('click', () => {
+            if (window.confetti) {
+                confetti({
+                    particleCount: 140,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+            playCelebrationFanfare();
+            notify('🎉 Celebration Fanfare & Confetti Blast Triggered!');
+        });
+
+        // --- URL Hash Encoder & Decoder ---
+        function updateUrlHash() {
+            const dateStr = targetDateTime ? targetDateTime.toISOString() : '';
+            const params = new URLSearchParams();
+            params.set('title', eventTitle);
+            params.set('quote', eventQuote);
+            params.set('date', dateStr);
+            params.set('theme', currentTheme);
+            window.location.hash = params.toString();
+        }
+
+        function loadFromUrlHash() {
+            if (window.location.hash) {
+                try {
+                    const raw = window.location.hash.substring(1);
+                    const params = new URLSearchParams(raw);
+                    if (params.get('title')) {
+                        eventTitle = params.get('title');
+                        inputTitle.value = eventTitle;
+                        document.getElementById('displayEventTitle').innerText = eventTitle;
+                    }
+                    if (params.get('quote')) {
+                        eventQuote = params.get('quote');
+                        inputQuote.value = eventQuote;
+                        document.getElementById('displayEventQuote').innerText = `"${eventQuote}"`;
+                    }
+                    if (params.get('date')) {
+                        targetDateTime = new Date(params.get('date'));
+                        inputDate.value = targetDateTime.toISOString().split('T')[0];
+                        document.getElementById('displayTargetDateString').innerText = targetDateTime.toLocaleDateString('en-US', {
+                            month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+                    if (params.get('theme') && themeConfigs[params.get('theme')]) {
+                        currentTheme = params.get('theme');
+                        document.querySelectorAll('.preset-pill').forEach(b => {
+                            if (b.dataset.preset === currentTheme) b.click();
+                        });
+                    }
+                } catch(e) {}
+            }
+        }
+
+        // WhatsApp Share Link
+        document.getElementById('btnShareWhatsApp').addEventListener('click', () => {
+            updateUrlHash();
+            const daysLeft = document.getElementById('unitDays').innerText;
+            const hoursLeft = document.getElementById('unitHours').innerText;
+            const fullUrl = window.location.href;
+            const msg = `⏳ Counting down to ${eventTitle}!\n"${eventQuote}"\n\n✨ Only ${daysLeft} Days, ${hoursLeft} Hours left!\n\nJoin the live celebration clock here:\n${fullUrl}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        });
+
+        document.getElementById('btnCopyDirectLink').addEventListener('click', () => {
+            updateUrlHash();
+            copyClipboard(window.location.href);
+        });
+
+        // --- 9:16 Story Card & Wedding Invite QR Engine ---
+        const cardModal = document.getElementById('cardModal');
+        const storyCanvas = document.getElementById('storyCanvas');
+        const sctx = storyCanvas.getContext('2d');
+        const hiddenQrContainer = document.getElementById('hiddenQrContainer');
+
+        function renderStoryCard() {
+            const W = storyCanvas.width;
+            const H = storyCanvas.height;
+
+            // Background Theme
+            sctx.fillStyle = currentTheme === 'wedding' ? '#1e0c38' : (currentTheme === 'birthday' ? '#3b0764' : '#070913');
+            sctx.fillRect(0, 0, W, H);
+
+            // Border Frame
+            sctx.strokeStyle = themeConfigs[currentTheme].color;
+            sctx.lineWidth = 4;
+            sctx.strokeRect(12, 12, W - 24, H - 24);
+
+            // Top Header Badge
+            sctx.fillStyle = themeConfigs[currentTheme].color;
+            sctx.font = 'bold 11px sans-serif';
+            sctx.textAlign = 'center';
+            sctx.fillText(themeConfigs[currentTheme].label.toUpperCase(), W / 2, 42);
+
+            // Event Title
+            sctx.fillStyle = '#ffffff';
+            sctx.font = 'black 17px sans-serif';
+            sctx.fillText(eventTitle, W / 2, 75);
+
+            // Poetic Quote on Story Card (Italicized)
+            sctx.fillStyle = '#fde68a';
+            sctx.font = 'italic 10px serif';
+            const shortQuote = eventQuote.length > 55 ? eventQuote.substring(0, 52) + '...' : eventQuote;
+            sctx.fillText(`"${shortQuote}"`, W / 2, 98);
+
+            // Target Date
+            sctx.fillStyle = '#94a3b8';
+            sctx.font = '10px sans-serif';
+            sctx.fillText(targetDateTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), W / 2, 118);
+
+            // Countdown Clocks Box
+            sctx.fillStyle = '#0f172a';
+            sctx.fillRect(25, 130, W - 50, 75);
+            sctx.strokeStyle = '#334155';
+            sctx.strokeRect(25, 130, W - 50, 75);
+
+            const d = document.getElementById('unitDays').innerText;
+            const h = document.getElementById('unitHours').innerText;
+            const m = document.getElementById('unitMinutes').innerText;
+            const s = document.getElementById('unitSeconds').innerText;
+
+            sctx.fillStyle = '#f59e0b';
+            sctx.font = 'black 22px monospace';
+            sctx.fillText(`${d}d : ${h}h : ${m}m : ${s}s`, W / 2, 172);
+
+            sctx.fillStyle = '#64748b';
+            sctx.font = '9px sans-serif';
+            sctx.fillText('DAYS   HOURS   MINS   SECS', W / 2, 192);
+
+            // Draw QR Code in Middle for Invite Card Printing
+            hiddenQrContainer.innerHTML = '';
+            new QRCode(hiddenQrContainer, {
+                text: window.location.href,
+                width: 120,
+                height: 120,
+                colorDark: '#070913',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            setTimeout(() => {
+                const qrCanvas = hiddenQrContainer.querySelector('canvas');
+                if (qrCanvas) {
+                    sctx.fillStyle = '#ffffff';
+                    sctx.fillRect(W / 2 - 68, 225, 136, 136);
+                    sctx.drawImage(qrCanvas, W / 2 - 60, 233, 120, 120);
+
+                    sctx.fillStyle = '#ffffff';
+                    sctx.font = 'bold 11px sans-serif';
+                    sctx.fillText('Scan with Phone to View Live', W / 2, 388);
+
+                    sctx.fillStyle = '#64748b';
+                    sctx.font = '9px sans-serif';
+                    sctx.fillText('CelebrationTimer Pro • 100% Free Forever', W / 2, 490);
+                }
+            }, 100);
+        }
+
+        document.getElementById('btnOpenCardModal').addEventListener('click', () => {
+            updateUrlHash();
+            cardModal.classList.remove('hidden');
+            renderStoryCard();
+        });
+
+        document.getElementById('btnCloseCardModal').addEventListener('click', () => {
+            cardModal.classList.add('hidden');
+        });
+
+        document.getElementById('btnDownloadStoryImg').addEventListener('click', () => {
+            const url = storyCanvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `countdown_${currentTheme}_card.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            notify('📸 Story image & QR card downloaded!');
+        });
+
+        document.getElementById('btnShareStoryDirect').addEventListener('click', () => {
+            copyClipboard(window.location.href);
+        });
+
+        document.getElementById('btnGiftPartner').addEventListener('click', () => {
+            notify('🛍️ Curated Event Gift Collection opened!');
+        });
+
+        // Initialize on Load
+        window.onload = () => {
+            loadFromUrlHash();
+            updateCountdownClock();
+        };
+    </script>
+</body>
+</html>
+```
